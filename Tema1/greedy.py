@@ -1,5 +1,4 @@
 import model
-import heuristics
 
 def __greedy__(state, heuristic, current_depth, max_depth):
 
@@ -27,7 +26,3 @@ def greedy(state, heuristic):
         i += 1
         rez = __greedy__(state, heuristic, 0, i)
     return rez
-
-# print(greedy(([2,3,1,
-# 			 0,4,5,
-# 			 6,7,8], None), heuristics.hamming))

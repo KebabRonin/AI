@@ -1,5 +1,4 @@
 import model
-import math
 
 def __IDDFS__(state, current_depth, depth):
     #print(state, current_depth, depth)
