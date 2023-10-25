@@ -39,22 +39,3 @@ def A_star(initial_state, heuristic):
 		print(f"after:\n	expl:{explored}\n	unex:{unexplored}\n\n")
 
 	print("gata de cautat")
-
-import state_prints as pr
-def hamming(state):
-	# Hamming distance
-	s = state[0]
-	n = int(math.sqrt(len(s)))
-	score = 0
-	# c = [i for i,x in enumerate(testlist) if x == 1]
-	# pr.pretty_print(state)
-
-	for index,i in enumerate(filter(lambda x: x > 0, s)):
-		if i != index + 1 + score:
-			score += 1
-		# score += abs((index+1)%n - i%n) + abs((index+1)//n - i//n)
-
-	return score
-
-
-# manhattan(([2,3,1,0,4,5,6,7,8], None))
