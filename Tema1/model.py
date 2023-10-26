@@ -87,6 +87,31 @@ def transition(state, dir_to_move):
     return (new_matrix, dir_to_move)
 
 
+def reverse_transition(state):
+
+    n = int(math.sqrt(len(state[0])))
+
+    poz_0 = state[0].index(0)
+    poz_to_move = state[0].index(state[1])
+
+    new_matrix = copy.deepcopy(state[0])
+
+    if state[1] == DOWN:
+            poz_to_move = poz_0 - n
+    if state[1] == LEFT:
+            poz_to_move = poz_0 + 1
+    if state[1] == UP:
+            poz_to_move = poz_0 + n
+    if state[1] == RIGHT:
+            poz_to_move = poz_0 - 1
+
+    new_matrix[poz_0] = new_matrix[poz_to_move]
+
+    new_matrix[poz_to_move] = 0
+
+    return new_matrix
+
+
 def test_model():
     print("is_final [8, 6, 7, 2, 5, 4, 0, 3, 1]:", is_final(([8, 6, 7, 2, 5, 4, 0, 3, 1], None)))
     print("is_final [1, 2, 0, 3, 4, 5, 6, 7 ,8]:", is_final(([1, 2, 0, 3, 4, 5, 6, 7 ,8], None)))

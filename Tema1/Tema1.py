@@ -25,9 +25,9 @@ def test_algo(algo, *args):
         0, 8, 4,
         3, 1, 6],
         # ^^ 23 steps
-        # [8, 6, 7,
-        # 2, 5, 4,
-        # 0, 3, 1]
+        [8, 6, 7,
+        2, 5, 4,
+        0, 3, 1]
         # ^^ 31 steps
     ]
 
@@ -44,8 +44,8 @@ def test_algo(algo, *args):
         print()
 
 
-test_algo(IDDFS.IDDFS)
-test_algo(greedy.greedy, heuristics.manhattan)
-test_algo(greedy.greedy, heuristics.hamming)
-test_algo(greedy.greedy, heuristics.chebyshev_distance)
-# test_algo(A_star.A_star, heuristics.hamming) # Nu merge
+test_algo(A_star.A_star, heuristics.manhattan)
+# test_algo(IDDFS.IDDFS)
+# test_algo(greedy.greedy, heuristics.manhattan)
+# test_algo(greedy.greedy, heuristics.hamming)
+# test_algo(greedy.greedy, heuristics.chebyshev_distance)
