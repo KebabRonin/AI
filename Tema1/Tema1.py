@@ -47,4 +47,5 @@ def test_algo(algo, *args):
 test_algo(IDDFS.IDDFS)
 test_algo(greedy.greedy, heuristics.manhattan)
 test_algo(greedy.greedy, heuristics.hamming)
+test_algo(greedy.greedy, heuristics.chebyshev_distance)
 # test_algo(A_star.A_star, heuristics.hamming) # Nu merge
