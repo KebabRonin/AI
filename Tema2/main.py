@@ -1,71 +1,37 @@
-# Step 1: Model the Problem
-variables = [[0 for _ in range(9)] for _ in range(9)]
-initial_board = [
-    [8, 4, 0, 0, 5, 0, 0, 0, 0],
-    [3, 0, 0, 6, 0, 8, 0, 4, 0],
-    [0, 0, 0, 4, 0, 9, 0, 0, 0],
-    [0, 2, 3, 0, 0, 0, 9, 8, 0],
-    [1, 0, 0, 0, 0, 0, 0, 0, 4],
-    [0, 9, 8, 0, 0, 0, 1, 6, 0],
-    [0, 0, 0, 5, 0, 3, 0, 0, 0],
-    [0, 3, 0, 1, 0, 6, 0, 0, 7],
-    [0, 0, 0, 0, 2, 0, 0, 1, 3]
-]
-for i in range(9):
-    for j in range(9):
-        variables[i][j] = initial_board[i][j]
+"""
+Variabile: pozitiile din tabla initiala care sunt 0
+Domenii: {1..9}
+Restrictii: Nu se poate repeta aceeasi cifra pe linie, coloana, sau intr-unul din patratele de 3x3
+            De asemenea, pe pozitiile marcate pot fi doar cifre pare
+"""
+import copy
+import model_util
+import arc_consistency
+import forward_checking
+import forward_checking2
 
-# Step 2: Implement Forward Checking
-def forward_check(variables, i, j, value):
-    # Check if the assigned value conflicts with other variables
-    for k in range(9):
-        if k != j and variables[i][k] == value:
-            return False
-        if k != i and variables[k][j] == value:
-            return False
-    # Check sub-region constraints
-    sub_i, sub_j = i//3*3, j//3*3
-    for a in range(sub_i, sub_i+3):
-        for b in range(sub_j, sub_j+3):
-            if a != i and b != j and variables[a][b] == value:
-                return False
-    # Additional constraint: Certain cells must allow even numbers
-    if (i, j) in [(0, 6), (2, 2), (2, 8), (3, 4), (4, 3), (4, 5), (5, 4), (6, 0), (6, 6), (8, 2)]:  # Add your specific cells here
-        if value % 2 != 0:
-            return False
-    return True
 
-# Step 3: Implement Variable Ordering (MRV)
-def get_unassigned_variable(variables):
-    # Find the unassigned variable with the fewest legal values left (MRV)
-    min_legal_values = float('inf')
-    selected_i, selected_j = None, None
-    for i in range(9):
-        for j in range(9):
-            if variables[i][j] == 0:
-                legal_values = [value for value in range(1, 10) if forward_check(variables, i, j, value)]
-                if len(legal_values) < min_legal_values:
-                    min_legal_values = len(legal_values)
-                    selected_i, selected_j = i, j
-    return selected_i, selected_j
+print("forward_checking".center(50,'='))
+forward_checking.print_sol(model_util.problem)
 
-# Main solving function (recursive backtracking with forward checking and MRV)
-def solve(variables):
-    i, j = get_unassigned_variable(variables)
-    if i is None and j is None:
-        return True  # All variables are assigned, solution found
-    for value in range(1, 10):
-        if forward_check(variables, i, j, value):
-            variables[i][j] = value
-            if solve(variables):
-                return True
-            variables[i][j] = 0  # Undo assignment if no solution found
-    return False
+print("forward_checking2".center(50,'='))
+forward_checking2.print_sol(model_util.problem)
 
-# Call the solve function to find a solution
-if solve(variables):
-    print("Solution found:")
-    for row in variables:
-        print(row)
-else:
-    print("No solution found.")
+print("arc_consistency".center(50,'='))
+arc_consistency.print_sol(model_util.problem)
+
+model_util.initial_board[0][2] = 0
+model_util.initial_board[6][4] = 4
+model_util.initial_board[4][4] = 8
+model_util.problem = (model_util.initial_board, model_util.par_pos)
+# for row in model_util.problem[0]:
+#     print(row)
+
+print("forward_checking".center(50,'='))
+forward_checking.print_sol(model_util.problem)
+
+print("forward_checking2".center(50,'='))
+forward_checking2.print_sol(model_util.problem)
+
+print("arc_consistency".center(50,'='))
+arc_consistency.print_sol(model_util.problem)
