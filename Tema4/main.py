@@ -25,7 +25,7 @@ def import_data():
 
 def split_dataset(dataset: list[tuple], p_train: float):
 	train_len = int(p_train*len(dataset))
-	return copy.deepcopy(dataset[:train_len]), copy.deepcopy(dataset[train_len:])
+	return dataset[:train_len], dataset[train_len:]
 
 
 class Layer:
@@ -73,6 +73,7 @@ class NeuralNetwork:
 
 	def train_online(self, train_set):
 		for epoch in range(self.max_epochs):
+			print("Epoch:", epoch)
 			for sample, expected_label in train_set:
 
 				# TODO Va trebui sa retin weight-urile intermediare probabil
@@ -82,12 +83,12 @@ class NeuralNetwork:
 				# label = inp
 
 				label = self.predict(sample)
-				# expected_label = self.interpret(expected_label)
+				expected_label = self.interpret(expected_label)
 
-				if (label != self.interpret(expected_label)).any():
+				if (label != expected_label).any():
 					# TODO Do this properly
 					# print(self.layers[-1])
-					error = np.array([(b - a) for a, b in zip(label, self.interpret(expected_label))])
+					error = np.array([(b - a) for a, b in zip(label, expected_label)])
 					self.layers[-1].weights += self.learning_rate * np.atleast_2d(sample).T * error
 					self.layers[-1].biases  += self.learning_rate * error
 					# print(self.layers[-1])
@@ -95,21 +96,15 @@ class NeuralNetwork:
 
 
 	def test(self, test_set):
-		# TODO total = 4 * n
-		# TODO ^^^^^^^^^^^^^ de ce da asa? de ce nu merge len??
 		correct = 0
 		n = len(test_set)
-		total = 0
 
-		for (sample, expected_label) in train_set:
-			# print(sample, expected_label)
+		for (sample, expected_label) in test_set:
 			label = self.predict(sample)
-			# print(label, expected_label, self.interpret(expected_label))
 			if (label == self.interpret(expected_label)).all():
 				correct += 1
-			total += 1
 
-		print("Test accuracy:", correct, n, total, correct/total)
+		print("Test accuracy:", correct/n)
 
 	def predict(self, sample):
 		inp = sample
@@ -132,7 +127,7 @@ nn = NeuralNetwork(layers=[
 # Import Data
 dataset = import_data()
 dataset.sort(key= lambda _: random.random())
-train_set, test_set = split_dataset(dataset, p_train= 0.8)
+train_set, test_set = split_dataset(dataset, p_train= 0.5)
 
 
 nn.train_online(train_set)
