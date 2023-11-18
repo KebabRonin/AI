@@ -12,7 +12,7 @@ To construct the data, seven geometric parameters of wheat kernels were measured
 All of these parameters were real-valued continuous.
 """
 
-import random, math, numpy as np, matplotlib as mpl
+import random, math, numpy as np, matplotlib.pyplot as mpl
 
 def import_data():
 	data = []
@@ -38,7 +38,7 @@ class Layer:
 		self.weights = np.random.rand(inputs, neurons)
 		self.biases  = np.random.rand(neurons)
 		self.activation = activation
-		self.derviata   = derivata
+		self.derivata   = derivata
 
 	def __repr__(self):
 		return str({
@@ -49,12 +49,12 @@ class Layer:
 		})
 
 	def forward_step(self, input, expected_label=None):
-		prediction = self.activation(np.dot(input, self.weights) + self.biases)
+		prediction = np.dot(input, self.weights) + self.biases
 		self.last_results = np.copy(prediction)
 		# if expected_label:
 		# 	# Calculez eroarea
 		# 	self.delta = expected_label - prediction
-		return prediction
+		return self.activation(prediction)
 
 	def backward_step(self, expected_label):
 		delta = self.last_results * self.derivata(expected_label)
@@ -78,57 +78,76 @@ class NeuralNetwork:
 			'layers': self.layers,
 		})
 
-	def train_online(self, train_set):
-		for epoch in range(self.max_epochs):
-			print("Epoch:", epoch)
-			for sample, expected_label in train_set:
-
-				# TODO Va trebui sa retin weight-urile intermediare probabil
-				# inp = sample
-				# for l in self.layers:
-				# 	inp = l.forward_step(inp)
-				# label = inp
-
-				label = self.predict(sample)
-
-				if (label != expected_label).any():
-					# TODO Do this properly
-					# print(self.layers[-1])
-					error = np.array([(b - a) for a, b in zip(label, expected_label)])
-					self.layers[-1].weights += self.learning_rate * np.atleast_2d(sample).T * error
-					self.layers[-1].biases  += self.learning_rate * error
-					for layer in self.layers[:-1]:
-						layer.backward_step(expected_label)
-					# print(self.layers[-1])
-					# print(label, self.interpret(expected_label), error)
-
-
-	def test(self, test_set):
-		correct = 0
-		n = len(test_set)
-
-		for (sample, expected_label) in test_set:
-			label = self.predict(sample)
-			if (label == expected_label).all():
-				correct += 1
-
-		print("Test accuracy:", correct/n)
-
 	def predict(self, sample):
 		inp = sample
 		for l in self.layers:
 			inp = l.forward_step(inp)
 		return inp
 
+	def train_batch(self, train_set):
+		self.epoch_progress = []
 
-def linear_activation(array):
+		for epoch in range(self.max_epochs):
+			print("Epoch:", epoch)
+			loss = 0
+			for sample, expected_label in train_set:
+				label = self.predict(sample)
+				loss += loss_MSE(label, expected_label)
+
+			self.epoch_progress.append(loss)
+
+			# Backpropagation
+			# ...
+
+		# Confusion Matrix in test
+		# rows = nn_label, columns = expected
+
+
+def interpret(arr):
+	max = 0
+	for id, val in enumerate(arr):
+		if val > arr[max]:
+			max = id
+	return max + 1
+
+
+def get_accuracy(nn, test_set):
+	correct = 0
+	n = len(test_set)
+
+	for (sample, expected_label) in test_set:
+		label = nn.predict(sample)
+		# if (label == expected_label).all():
+		if interpret(label) == interpret(expected_label):
+			correct += 1
+
+	print("Test accuracy:", correct/n)
+
+
+def threshold_activation(array):
 	for a in range(len(array)):
 		array[a] = int(array[a] > 0)
 	return array
+
 def ReLU_activation(array):
 	for a in range(len(array)):
 		array[a] = array[a] if int(array[a] > 0) else 0
 	return array
+def ReLU_derivata(array):
+	for a in range(len(array)):
+		array[a] = 1 if array[a] > 0 else 0
+	return array
+
+def sigmoid_activation(array):
+	for a in range(len(array)):
+		array[a] = math.e**(array[a]) / (1 + math.e**(array[a]))
+	return array
+def sigmoid_derivata(array):
+	for a in range(len(array)):
+		sig = math.e**(array[a]) / (1 + math.e**(array[a]))
+		array[a] = sig * (1 - sig)
+	return array
+
 
 
 def loss_MSE(label, expected_label):
@@ -137,25 +156,31 @@ def loss_MSE(label, expected_label):
 		s += (el - l)**2
 	s /= 2
 	return s
-# def loss_CrossEntropy(label, expected_label):
-# 	# s = 0
-# 	# for l, el in zip(label, expected_label):
-# 	# 	s += l * math.log(1e-15 + el)
-# 	return  
 
 nn = NeuralNetwork(layers=[
-	Layer(inputs=7, neurons=5, activation=ReLU_activation, derivata=lambda x: 1 if x > 0 else 0),
-	Layer(inputs=5, neurons=3, activation=linear_activation, derivata=lambda _: 1),
+	Layer(inputs=7, neurons=5, activation=ReLU_activation, derivata=ReLU_derivata),
+	Layer(inputs=5, neurons=3, activation=sigmoid_activation, derivata=sigmoid_derivata),
 ], learning_rate=0.1, max_epochs=5)
 
 # Import Data
 dataset = import_data()
 print("Done importing")
 dataset.sort(key= lambda _: random.random())
-train_set, test_set = split_dataset(dataset, p_train= 0.5)
+train_set, test_set = split_dataset(dataset, p_train= 0.8)
 
 
-# nn.train_online(train_set)
-# print(nn)
-nn.test(test_set)
+# nn.train_batch(train_set)
+
+# mpl.plot(list(range(nn.max_epochs)), nn.epoch_progress)
+# mpl.xticks(range(nn.max_epochs))
+# mpl.show()
+
+print(nn)
+get_accuracy(nn, test_set)
+
+print("Prediction for ", test_set[0][0])
+print(f"(Expected {test_set[0][1]})")
 print(nn.predict(test_set[0][0])) # prima instanta, doar input-ul
+
+for id, l in enumerate(nn.layers):
+	print("Layer", id, l.last_results)
