@@ -27,3 +27,11 @@ def sigmoid_d(a):
 	return sig * (1 - sig)
 sigmoid_activation = vectorize(sigmoid)
 sigmoid_derivata   = vectorize(sigmoid_d)
+
+def tanh(a):
+	return (1 - math.e**(-2*a)) / (1 + math.e**(-2*a))
+def tanh_d(a):
+	t = tanh(a)
+	return 1 - t**2
+tanh_activation = vectorize(tanh)
+tanh_derivata   = vectorize(tanh_d)

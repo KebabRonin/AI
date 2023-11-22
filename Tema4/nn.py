@@ -4,14 +4,14 @@ def loss_MSE(label, expected_label):
 	s = 0
 	for l, el in zip(label, expected_label):
 		s += (l - el)**2
-	s /= 2 * len(label)
+	s /= 2
 	return s
 
 def loss_MSE_grad(label, expected_label):
 	k = len(label)
 	grad = np.zeros(k)
 	for id, (l, el) in enumerate(zip(label, expected_label)):
-		grad[id] = (l - el) / k
+		grad[id] = (l - el)
 	return grad
 
 class Layer:
@@ -19,8 +19,8 @@ class Layer:
 		self.inputs = inputs
 		self.neurons = neurons
 
-		self.weights = np.random.uniform(low=0.2, high=1.2, size=(inputs, neurons))
-		self.biases  = np.random.uniform(low=0, high=0.2, size=(neurons,))
+		self.weights = np.random.uniform(low=-0.1, high=0.1, size=(inputs, neurons))
+		self.biases  = np.random.uniform(low=-0.05, high=0.05, size=(neurons,))
 
 		self.reset_deltas()
 
@@ -72,8 +72,11 @@ class NeuralNetwork:
 	def compute_delta(self, l_index: int):
 		layer = self.layers[l_index]
 		next_l = self.layers[l_index + 1]
-		layer.d_w = np.dot(layer.weights, next_l.delta_w)
-		layer.d_b = 1
+		deriv_grad = layer.derivata(layer.last_results)
+		layer.delta = np.dot(np.multiply(next_l.delta, deriv_grad), layer.weights)
+		layer.d_w = np.dot(layer.last_results, layer.delta)
+		layer.d_b = layer.delta
+		layer.delta = np.dot(layer.delta, layer.weights)
 		layer.delta_w += layer.d_w
 		layer.delta_b += layer.d_b
 
@@ -83,15 +86,16 @@ class NeuralNetwork:
 		out_l = self.layers[-1]
 		error_grad = loss_MSE_grad(out_l.last_results, expected_label)
 		deriv_grad = out_l.derivata(out_l.last_results)
-		grad = np.multiply(error_grad, deriv_grad)
-		out_l.d_w = np.atleast_2d(self.layers[-2].last_results).T * grad
-		out_l.d_b = grad
+		out_l.delta = np.multiply(error_grad, deriv_grad)
+		out_l.d_w = np.atleast_2d(self.layers[-2].last_results).T * out_l.delta
+		out_l.d_b = out_l.delta
+		out_l.delta = np.dot(out_l.delta, np.transpose(out_l.weights))
 		out_l.delta_w += out_l.d_w
 		out_l.delta_b += out_l.d_b
 
 		# Remaining Layers
-		# for l in reversed(range(len(self.layers) - 1)):
-		# 	self.compute_delta(l)
+		for l in reversed(range(len(self.layers) - 2)):
+			self.compute_delta(l)
 
 	def update_layers(self):
 		# Update weights
@@ -117,7 +121,7 @@ class NeuralNetwork:
 				loss += loss_MSE(label, expected_label)
 
 			self.update_layers()
-			self.epoch_progress.append(loss / len(train_set))
+			self.epoch_progress.append(loss)
 
 		# Confusion Matrix in test
 		# rows = nn_label, columns = expected

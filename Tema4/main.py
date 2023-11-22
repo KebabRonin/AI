@@ -3,8 +3,8 @@ import data_ops as data, activations as act, nn
 import random, matplotlib.pyplot as mpl
 
 my_nn = nn.NeuralNetwork(layers=[
-	nn.Layer(inputs=7, neurons=7, activation=act.ReLU_activation, derivata=act.ReLU_derivata),
-	nn.Layer(inputs=7, neurons=3, activation=act.sigmoid_activation, derivata=act.sigmoid_derivata),
+	nn.Layer(inputs=7, neurons=5, activation=act.ReLU_activation, derivata=act.ReLU_derivata),
+	nn.Layer(inputs=5, neurons=3, activation=act.sigmoid_activation, derivata=act.sigmoid_derivata),
 ], learning_rate=0.1, max_epochs=20)
 
 # Import Data
