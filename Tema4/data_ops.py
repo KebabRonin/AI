@@ -49,7 +49,8 @@ def get_stats(tested_nn, test_set):
 
 	print("Test accuracy:", correct/n)
 	print("Confusion matrix:")
-	mpl.matshow(confusion_matrix)
-	mpl.show()
 	for i in range(3):
 		print(confusion_matrix[i])
+
+	mpl.matshow(confusion_matrix)
+	mpl.show()
