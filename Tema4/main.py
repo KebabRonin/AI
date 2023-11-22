@@ -16,10 +16,6 @@ train_set, test_set = data.split_dataset(dataset, p_train= 0.8)
 
 my_nn.train_batch(train_set)
 
-mpl.plot(list(range(my_nn.max_epochs)), my_nn.epoch_progress)
-mpl.xticks(range(my_nn.max_epochs))
-mpl.show()
-
 print(my_nn)
 data.get_stats(my_nn, test_set)
 

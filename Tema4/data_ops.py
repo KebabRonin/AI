@@ -1,4 +1,4 @@
-import numpy as np
+import numpy as np, matplotlib.pyplot as mpl
 
 def import_data():
 	data = []
@@ -32,17 +32,24 @@ def interpret(arr):
 
 
 def get_stats(tested_nn, test_set):
+
+	if 'epoch_progress' in dir(tested_nn):
+		mpl.plot(list(range(tested_nn.max_epochs)), tested_nn.epoch_progress)
+		mpl.xticks(range(tested_nn.max_epochs))
+
 	correct = 0
 	n = len(test_set)
 	confusion_matrix = [[0 for i in range(3)] for i in range(3)]
 
 	for (sample, expected_label) in test_set:
 		label = tested_nn.forward(sample)
-		confusion_matrix[interpret(label)-1][interpret(expected_label)-1] += 1
+		confusion_matrix[interpret(label)-1][interpret(expected_label)-1] += 1 / len(test_set)
 		if interpret(label) == interpret(expected_label):
 			correct += 1
 
 	print("Test accuracy:", correct/n)
 	print("Confusion matrix:")
+	mpl.matshow(confusion_matrix)
+	mpl.show()
 	for i in range(3):
 		print(confusion_matrix[i])
