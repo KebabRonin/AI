@@ -5,7 +5,7 @@ import random, matplotlib.pyplot as mpl
 my_nn = nn.NeuralNetwork(layers=[
 	nn.Layer(inputs=7, neurons=7, activation=act.sigmoid_activation, derivata=act.sigmoid_derivata),
 	nn.Layer(inputs=7, neurons=3, activation=act.sigmoid_activation, derivata=act.sigmoid_derivata),
-], learning_rate=0.1, max_epochs=200)
+], learning_rate=0.1, max_epochs=1000)
 
 # Import Data
 dataset = data.import_data()

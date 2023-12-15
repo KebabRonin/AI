@@ -39,7 +39,7 @@ def get_stats(tested_nn, test_set):
 
 	correct = 0
 	n = len(test_set)
-	confusion_matrix = [[0 for i in range(3)] for i in range(3)]
+	confusion_matrix = [[0.0 for i in range(3)] for i in range(3)]
 
 	for (sample, expected_label) in test_set:
 		label = tested_nn.forward(sample)

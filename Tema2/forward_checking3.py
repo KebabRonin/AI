@@ -1,7 +1,10 @@
+import copy
 import model_util
 
-def forward_check(problem, var, value):
-    return model_util.get_vars(problem[0], problem[1])
+def forward_check(problem, variables, var):
+    for x in var[1]:
+        for v in model_util.get_neighbours(v[0]):
+
 
 def solve(problem, variables):
     board, parity_pos = problem
@@ -9,18 +12,14 @@ def solve(problem, variables):
         return True
     model_util.mrv(variables)
 
-    (i, j), dom = variables[0]
-    dom = copy.deepcopy(dom)
+    (i, j), _ = variables[0]
     
-    for value in dom:
-        board[i][j] = value
-        variables = forward_check(problem)
-        if variables is None:
-            board[i][j] = 0
-        elif solve(problem, variables):
-            return True
-        board[i][j] = 0
-    return False
+    choice = forward_check(problem, variables, variables[0])
+    if choice is None:
+        return False
+    else:
+        board[i][j] = choice
+    return solve(problem, variables)
 
 import copy
 def print_sol(state):

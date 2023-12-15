@@ -3,7 +3,7 @@ import numpy as np
 def loss_MSE(label, expected_label):
 	s = 0
 	for l, el in zip(label, expected_label):
-		s += (el - l)**2
+		s += (l - el)**2
 	s /= 2
 	return s
 
@@ -40,6 +40,7 @@ class Layer:
 		self.delta_b = np.zeros_like(self.biases)
 
 	def forward_step(self, input, expected_label=None):
+		self.last_z = np.dot(input, self.weights) + self.biases
 		prediction = self.activation(np.dot(input, self.weights) + self.biases)
 		self.last_results = np.copy(prediction)
 		self.last_input = np.copy(input)
@@ -73,27 +74,21 @@ class NeuralNetwork:
 	def compute_delta(self, l_index: int):
 		layer = self.layers[l_index]
 		next_l = self.layers[l_index + 1]
-		deriv_grad = layer.derivata(layer.last_results)
-		layer.grad = np.multiply(next_l.grad, deriv_grad)
-		layer.grad = np.dot(layer.grad, np.transpose(layer.weights))
-		layer.d_w = np.atleast_2d(layer.last_input).T * layer.grad
-		layer.d_b = layer.grad
-		# print(layer.delta_b.shape, layer.d_b.shape, layer.d_w.shape, layer.grad.shape, layer.weights.shape, next_l.grad.shape)
-		layer.delta_w += layer.d_w
-		layer.delta_b += layer.d_b
+		layer.grad = next_l.grad * layer.derivata(layer.last_z)
+		layer.delta_w += np.dot(np.atleast_2d(layer.last_input).T, np.atleast_2d(layer.grad))
+		layer.delta_b += layer.grad
+
+		layer.grad = np.dot(np.atleast_2d(layer.grad), np.transpose(layer.weights))
 
 
 	def backprop(self, expected_label):
 		# Output Layer
 		out_l = self.layers[-1]
-		error_grad = loss_MSE_grad(out_l.last_results, expected_label)
-		deriv_grad = out_l.derivata(out_l.last_results)
-		out_l.grad = np.multiply(error_grad, deriv_grad)
-		out_l.d_w = np.atleast_2d(out_l.last_input).T * out_l.grad
-		out_l.d_b = out_l.grad
-		out_l.grad = np.dot(out_l.grad, np.transpose(out_l.weights))
-		out_l.delta_w += out_l.d_w
-		out_l.delta_b += out_l.d_b
+		out_l.grad = loss_MSE_grad(out_l.last_results, expected_label) * out_l.derivata(out_l.last_z)
+		out_l.delta_w += np.dot(np.atleast_2d(out_l.last_input).T, np.atleast_2d(out_l.grad))
+		out_l.delta_b += out_l.grad
+
+		out_l.grad = np.dot(np.atleast_2d(out_l.grad), np.transpose(out_l.weights)).flatten()
 
 		# # Remaining Layers
 		for l in reversed(range(len(self.layers) - 1)):
